@@ -1,0 +1,63 @@
+#!/usr/bin/bash
+set -e -u
+
+# Configuraciones tomadas de repos git
+
+# Configurar i3wm
+cd /opt
+git clone https://github.com/solimanhub/i3wn.git
+while IFS= read -r line
+do
+  u="$line"
+done < user
+
+rm /home/$u/.config/i3/config
+mv i3wn/config /home/$u/.config/i3/
+rm -rf i3wn
+
+
+# Comando ves
+git clone https://github.com/SolimanHub/comando_ves.git
+ln -s /opt/comando_ves/ves /usr/bin/ves
+
+# Configurar Bashrc
+git clone https://github.com/SolimanHub/bashrc.git
+mv bashrc /home/$u/.config/
+ln -s /home/$u/.config/bashrc/.bashrc /home/$u/.bashrc
+ln -s /home/$u/.config/bashrc/.bashrc /root/.bashrc
+source /home/$u/.config/bashrc/.bashrc
+
+# Cargar carpeta script /opt
+git clone https://github.com/solimanhub/scripts.git
+mv scripts script
+
+# Configurar neovim
+cd /home/$u/.config
+git clone https://github.com/SolimanHub/nvim.git
+mkdir plugged/
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+su $u
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+exit
+
+# Configurar AUR
+git clone https://aur.archlinux.org/yay.git
+cd yay/
+
+while IFS= read -r line
+do
+  u="$line"
+done < ../user
+
+chmod 777 PKGBUILD
+mv PKGBUILD /home/$u/
+su $u
+cd ~/
+echo "===== Contrase;a de Root ====="
+makepkg -si
+exit
+
+rm -r /root/.config/
+cp -r /home/$u/.config/ /root/
+
+rm -r /opt/*

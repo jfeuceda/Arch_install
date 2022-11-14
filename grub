@@ -1,0 +1,28 @@
+#!/usr/bin/bash
+set -e -u
+
+# actualizando las bases para evitar errores
+pacman -Syy
+pacman -S grub --noconfirm
+
+grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB
+grub-mkconfig -o /boot/grub/grub.cfg
+rm /etc/default/grub
+mv ./grub_conf /etc/default/grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+echo "===== root passwd ====="
+
+passwd
+
+echo "===== Create user: ======"
+echo "User name:"
+read user
+
+#crea un archivo user, se usa en extras
+echo $user > /opt/user
+
+useradd -m -g users -G audio,lp,optical,storage,video,wheel,games,power,scanner -s /bin/bash $user && passwd $user
+
+chmod +x extras
+./extras

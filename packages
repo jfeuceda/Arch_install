@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+set -e -u
+
+pacstrap /mnt base base-devel efibootmgr gvfs gvfs-afc gvfs-mtp linux linux-headers linux-firmware nano wpa_supplicant dialog xf86-input-synaptics
+
+genfstab -pU /mnt >> /mnt/etc/fstab
+
+./pre_conf
